@@ -15,20 +15,56 @@
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.6</version>
                 <executions>
+                    <!-- pre-unit-test execution helps setting up some maven property,
+                      which will be used later by JaCoCo -->
                     <execution>
+                        <id>pre-unit-test</id>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
+<!--                        <configuration>-->
+<!--                            <destFile>${project.build.directory}/coverage-reports/jacoco-ut.exec</destFile>-->
+<!--                            &lt;!&ndash; passing property which will contains settings for JaCoCo agent.-->
+<!--                              If not specified, then "argLine" would be used for "jar" packaging &ndash;&gt;-->
+<!--                            <propertyName>jaCoCoArgLine</propertyName>-->
+<!--                        </configuration>-->
                     </execution>
+                    <!-- report phase setup -->
                     <execution>
-                        <id>report</id>
-                        <phase>prepare-package</phase>
+                        <id>post-unit-test</id>
+                        <phase>test</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
+                        <configuration>
+                            <!-- output file with report data. -->
+                            <dataFile>${project.build.directory}/coverage-reports/jacoco-ut.exec</dataFile>
+                            <!-- output directory for the reports. -->
+                            <outputDirectory>${project.reporting.outputDirectory}/jacoco-ut</outputDirectory>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
+
+<!--            <plugin>-->
+<!--                <artifactId>maven-surefire-plugin</artifactId>-->
+<!--                <version>2.22.2</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>default-test</id>-->
+<!--                        <phase>test</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>test</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <argLine>jaCoCoArgLine -Xmx1024m </argLine>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--                <configuration>-->
+<!--                    <argLine>-XX:MaxPermSize=512m</argLine>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
         </plugins>
 
     </build>
