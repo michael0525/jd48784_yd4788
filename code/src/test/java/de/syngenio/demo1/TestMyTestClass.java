@@ -1,4 +1,4 @@
-package de.syngenio.demo;
+package de.syngenio.demo1;
 
 import static org.junit.Assert.assertThat;
 

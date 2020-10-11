@@ -1,5 +1,5 @@
 // basic testing
-package de.syngenio.demo;
+package de.syngenio.demo1;
 
 public class MyTestClass {
 	public int doSomething(String param1, int param2) {

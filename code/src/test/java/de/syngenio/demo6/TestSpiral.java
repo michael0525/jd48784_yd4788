@@ -1,4 +1,4 @@
-package de.syngenio.robot;
+package de.syngenio.demo6;
 
 import static org.mockito.Mockito.inOrder;
 
