@@ -11,17 +11,21 @@ import java.util.regex.Pattern;
 
 public class MavenInvocationHelper {
     class RTSLoggingHandler implements InvocationOutputHandler {
-        public boolean foundAffected=false;
-        public boolean foundTotal=false;
+        HashSet<String> affectedTests=new HashSet<>();
+        boolean foundAffected=false;
+        boolean foundTotal=false;
 
         Pattern patternAffected = Pattern.compile("Running (.+)");
         Pattern patternTotal = Pattern.compile("TotalTests: (\\d+)");
-        public int total=0;
-        public void reset(){
+        int total=0;
+        void reset(){
             foundAffected=false;
             foundTotal=false;
             affectedTests.clear();
             total=0;
+        }
+        HashSet<String> getAffectedTests(){
+            return affectedTests;
         }
         @Override
         public void consumeLine(String s) {
@@ -39,16 +43,15 @@ public class MavenInvocationHelper {
                 foundTotal=true;
                 System.out.println(matchTotal.group(1));
                 total=Integer.parseInt(matchTotal.group(1));
-
             }
         }
     }
     class TestLoggingHandler implements InvocationOutputHandler {
-        public boolean success=false;
+        boolean success=false;
         Pattern patternSuccess = Pattern.compile("Failures: 0");
         Pattern patternTime = Pattern.compile("Time elapsed: ([0-9]+[.][0-9]*) sec");
         double runningTime=0;
-        public void reset(){
+        void reset(){
             success=false;
         }
         @Override
@@ -65,17 +68,14 @@ public class MavenInvocationHelper {
             }
         }
     }
+
+
     HashSet<String> affectedTests=new HashSet<>();
-    private RTSLoggingHandler RTSLoggingHandler = new RTSLoggingHandler();
-    private String mavenHome;
-    private String mavenPom;
+    private RTSLoggingHandler rtsLoggingHandler = new RTSLoggingHandler();
     private Invoker invoker;
-    private SystemOutLogger systemOutLogger = new SystemOutLogger();;
+//    private SystemOutLogger systemOutLogger = new SystemOutLogger();;
     private TestLoggingHandler testLoggingHandler = new TestLoggingHandler();
-//    private PrintStreamLogger streamLogger;
-//    ByteArrayOutputStream byteArrayOutputStream;
-//    PrintStream ps;
-    InvocationRequest request;
+    private InvocationRequest request;
 
 
     public MavenInvocationHelper() {
@@ -83,26 +83,16 @@ public class MavenInvocationHelper {
         Properties properties = new Properties();
         InputStream input = null;
         invoker = new DefaultInvoker();
-//        byteArrayOutputStream = new ByteArrayOutputStream();
-//        final String utf8 = StandardCharsets.UTF_8.name();
-
-
-
         try {
             input = new FileInputStream("project.properties");
             properties.load(input);
 
-            mavenHome = properties.getProperty("maven_home");
+            String mavenHome = properties.getProperty("maven_home");
             invoker.setMavenHome(new File(mavenHome));
 
-            mavenPom = properties.getProperty("maven_pom");
+            String mavenPom = properties.getProperty("maven_pom");
             request = new DefaultInvocationRequest();
             request.setPomFile(new File(mavenPom));
-
-//            ps = new PrintStream(byteArrayOutputStream, true, utf8);
-//            streamLogger = new PrintStreamLogger(ps, InvokerLogger.DEBUG);
-
-
         } catch (IOException io) {
             io.printStackTrace();
         } finally {
@@ -125,7 +115,8 @@ public class MavenInvocationHelper {
             System.out.println(e.getMessage());;
         }
     }
-    public void runTest(String testName){
+    public double runTest(String testName){
+        System.out.println("start running test: " + testName);
         testLoggingHandler.reset();
         invoker.setOutputHandler(testLoggingHandler);
         request.setGoals(Collections.singletonList("verify -Dtest="+testName));
@@ -134,11 +125,15 @@ public class MavenInvocationHelper {
             invoker.execute(request);
             if(testLoggingHandler.success){
                 System.out.println("test passed.");
+
+                return testLoggingHandler.runningTime;
             }else{
                 System.out.println("test failed");
+                return 0;
             }
         }catch (MavenInvocationException e){
-            System.out.println(e.getMessage());;
+            System.out.println(e.getMessage());
+            return 0;
         }
     }
     public void cleanCoverageFile(){
@@ -150,16 +145,19 @@ public class MavenInvocationHelper {
             System.out.println("exec file not found.");
         }
     }
-    public void runTestWithRTS() {
-        RTSLoggingHandler.reset();
+    public HashSet<String> runTestWithRTS() {
+        rtsLoggingHandler.reset();
 //        byteArrayOutputStream.reset();
 //        invoker.setLogger(streamLogger);
         request.setGoals(Collections.singletonList("starts:starts"));
-        invoker.setOutputHandler(RTSLoggingHandler);
+        invoker.setOutputHandler(rtsLoggingHandler);
         try{
             invoker.execute(request);
+            affectedTests = rtsLoggingHandler.getAffectedTests();
+            return affectedTests;
         }catch (MavenInvocationException e){
-            System.out.println(e.getMessage());;
+            System.out.println(e.getMessage());
+            return new HashSet<>();
         }
 
     }

@@ -1,6 +1,7 @@
 package coverage;
 
 
+import java.util.HashSet;
 import java.util.Iterator;
 
 public class CoverageCalculator {
@@ -15,10 +16,10 @@ public class CoverageCalculator {
     public void calculate(){
 //        helper.cleanAll();
 //        helper.runTest("de.syngenio.demo4.TestController");
-        helper.runTestWithRTS(); // get all affected tests
+        HashSet<String> affectedTests = helper.runTestWithRTS(); // get all affected tests
         helper.cleanCoverageFile();
 
-        Iterator<String> iter=helper.affectedTests.iterator();
+        Iterator<String> iter=affectedTests.iterator();
         int n = helper.affectedTests.size();
         for(int i=0;i<n&&iter.hasNext();i++){
             String testName=iter.next();
