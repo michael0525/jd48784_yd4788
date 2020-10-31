@@ -29,7 +29,7 @@ public class TestSuiteCoverageState {
         // Get the root directory
         String rootDir = System.getProperty("user.dir");
         // Get the directory for the target coverage data files
-        File directoryPath = new File(rootDir + "/target/site/jacoco");
+        File directoryPath = new File(rootDir + "/target/coverage-report");
         //List of all files and directories inside the jacoco directory
         File[] fileList = directoryPath.listFiles();
         //Get the test suite directories from the file directories
