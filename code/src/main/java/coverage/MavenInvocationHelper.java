@@ -2,7 +2,10 @@ package coverage;
 
 import org.apache.maven.shared.invoker.*;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Properties;
@@ -47,24 +50,25 @@ public class MavenInvocationHelper {
         }
     }
     class TestLoggingHandler implements InvocationOutputHandler {
-        boolean success=false;
-        Pattern patternSuccess = Pattern.compile("Failures: 0");
+        boolean success=true;
+        Pattern patternFailed = Pattern.compile("There are test failures.");
         Pattern patternTime = Pattern.compile("Time elapsed: ([0-9]+[.][0-9]*) sec");
         double runningTime=0;
         void reset(){
-            success=false;
+            runningTime=0;
+            success=true;
         }
         @Override
         public void consumeLine(String s) {
 //            System.out.println(s);
-            Matcher matchSuccess = patternSuccess.matcher(s);
+            Matcher matchFailed = patternFailed.matcher(s);
             Matcher matchTime=patternTime.matcher(s);
-            if(matchSuccess.find()){
-                success=true;
+            if(matchFailed.find()){
+                success=false;
             }
             if(matchTime.find()){
-                runningTime=Double.parseDouble(matchTime.group(1));
-                System.out.println("running time: "+runningTime+" s");
+                runningTime+=Double.parseDouble(matchTime.group(1));
+                System.out.println("Accumulated running time: "+runningTime+" s");
             }
         }
     }
@@ -120,6 +124,38 @@ public class MavenInvocationHelper {
         testLoggingHandler.reset();
         invoker.setOutputHandler(testLoggingHandler);
         request.setGoals(Collections.singletonList("verify -Dtest="+testName));
+
+        try{
+            invoker.execute(request);
+            if(testLoggingHandler.success){
+                System.out.println("test passed.");
+
+                return testLoggingHandler.runningTime;
+            }else{
+                System.out.println("test failed");
+                return -1;
+            }
+        }catch (MavenInvocationException e){
+            System.out.println(e.getMessage());
+            return -1;
+        }
+    }
+    public double runTest(HashSet<String> testNames){
+        if(testNames.isEmpty()){
+            System.out.println("No test to run");
+            return 0;
+        }
+        StringBuilder sb = new StringBuilder();
+        for(String testName:testNames){
+            sb.append(testName);
+            sb.append(',');
+        }
+        sb.deleteCharAt(sb.length()-1);
+        String testNameString=sb.toString();
+        System.out.println("start running test: " + testNameString);
+        testLoggingHandler.reset();
+        invoker.setOutputHandler(testLoggingHandler);
+        request.setGoals(Collections.singletonList("verify -Dtest="+testNameString));
 
         try{
             invoker.execute(request);

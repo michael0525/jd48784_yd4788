@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Stream;
 
-public class TestSuiteCoverageState {
+public class TestSuiteCoverageState implements java.io.Serializable {
     String packageName;
     Map<String, FileCoverage> fileCoverageMap;
 

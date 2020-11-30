@@ -14,6 +14,7 @@ public class Controller {
 	
 	public void singleDecision() {
 		if (_sensor.isMotorBlocked()) {
+//			int a =2;
 			_actor.stopMotor();
 		} else {
 			int desiredTemperature;
