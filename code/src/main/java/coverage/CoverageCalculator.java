@@ -12,7 +12,6 @@ public class CoverageCalculator {
     public CoverageCalculator(String packagePath) {
         CoverageCalculator.packagePath = packagePath;
         helper = new MavenInvocationHelper();
-
     }
 
     public void outputToFile(HashMap<String, TestSuiteCoverageState> suiteCoverageStateMap) {
@@ -60,17 +59,24 @@ public class CoverageCalculator {
         report.append("Missed Lines:\n");
 
         for(String filename : targetCoverageState.fileCoverageMap.keySet()){
+            // check through all filenames in targetCoverageState.
             report.append("Filename: "+filename+"\n");
             FileCoverage fc= targetCoverageState.fileCoverageMap.get(filename);
             Set<Integer> missedLines=fc.missedLines;
 
             for(Iterator<Integer> iter=missedLines.iterator();iter.hasNext();){
-                // check whether this line is contained in all set.
+                // check whether this line is uncovered in all other states.
                 Integer line=iter.next();
                 boolean missed=true;
                 for(TestSuiteCoverageState state:suiteCoverageStateMap.values()){
+                    if(!state.fileCoverageMap.containsKey(filename)){
+                        // no such file in old report, the lines should keep status of "missed".
+                        System.out.println("No such file in old data. Ignored.");
+                        continue;
+                    }
                     Set<Integer> missedLinesAnotherSuite=state.fileCoverageMap.get(filename).missedLines;
-                    if(!missedLinesAnotherSuite.contains(line) && line<=state.fileCoverageMap.get(filename).numberOfLines){
+                    if((!missedLinesAnotherSuite.contains(line)) && line<=state.fileCoverageMap.get(filename).maxLogicalLineNumber){
+//                        System.out.println("remove line"+line+"-"+filename);
                         iter.remove();
                         missed=false;
                         break;

@@ -6,6 +6,8 @@ import java.nio.file.Files;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class TestSuiteCoverageState implements java.io.Serializable {
@@ -51,8 +53,12 @@ public class TestSuiteCoverageState implements java.io.Serializable {
             for (File htmlFile : htmlFileList) {
                 String content = fileToString(htmlFile);
 
-                //Total number of lines
+                //Total number of lines in the file
+                int maxLogicalLineNumber = getMaximumLocalLineNumber(content);
+
+                //Total number of logical lines
                 int numberOfLines = content.split("id=\"L", -1).length - 1;
+
                 //Get package name and file name
                 int packageNameStartIndex = content.indexOf("class=\"el_package\">") + 19;
                 int packageNameLength = content.substring(packageNameStartIndex).indexOf("<");
@@ -74,9 +80,26 @@ public class TestSuiteCoverageState implements java.io.Serializable {
 
                 //Create a FileCoverage object and put it into the fileCoverageMap
                 FileCoverage fc = new FileCoverage(numberOfLines, missedLines);
+                fc.maxLogicalLineNumber=maxLogicalLineNumber;
                 fileCoverageMap.put(name, fc);
             }
         }
+    }
+
+    private int getMaximumLocalLineNumber(String content) {
+        Pattern patternLine = Pattern.compile("id=\"L(\\d+)\"");
+        Matcher matchLine = patternLine.matcher(content);
+        int result=-1;
+        while(matchLine.find()){
+            result=Integer.parseInt(matchLine.group(1));
+        }
+        if(result!=-1){
+//            System.out.println("last line="+result);
+            return result;
+        }else{
+            return 0;
+        }
+
     }
 
     private String fileToString(File file) {
