@@ -1,4 +1,4 @@
 /target/
 /jdeps-cache/
 /.starts/
-statemap.data
+/report/

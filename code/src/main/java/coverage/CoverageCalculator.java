@@ -7,14 +7,14 @@ import java.util.*;
 public class CoverageCalculator {
     static private String packagePath;
     static private MavenInvocationHelper helper;
-    final private String mapFileName = "statemap.data";
+    final static private String mapFileName = "statemap.data";
 
     public CoverageCalculator(String packagePath) {
         CoverageCalculator.packagePath = packagePath;
         helper = new MavenInvocationHelper();
     }
 
-    public void outputToFile(HashMap<String, TestSuiteCoverageState> suiteCoverageStateMap) {
+    public static void outputToFile(HashMap<String, TestSuiteCoverageState> suiteCoverageStateMap) {
         try {
             FileOutputStream fileOut =
                     new FileOutputStream(mapFileName);
@@ -28,7 +28,7 @@ public class CoverageCalculator {
         }
     }
 
-    public HashMap<String, TestSuiteCoverageState> readFromFile() {
+    public static HashMap<String, TestSuiteCoverageState> readFromFile() {
         HashMap<String, TestSuiteCoverageState> result;
         try {
             FileInputStream fileIn = new FileInputStream(mapFileName);
@@ -94,6 +94,14 @@ public class CoverageCalculator {
             report.append("\n");
         }
         System.out.println(report);
+        ReportGenerator reportGenerator=new ReportGenerator(targetCoverageState);
+        try{
+            reportGenerator.generateReport();
+        }catch (IOException e){
+            System.out.println("Exception when generating the report: ");
+            e.printStackTrace();
+        }
+
 
 
     }

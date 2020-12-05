@@ -4,7 +4,8 @@ package de.syngenio.demo1;
 public class MyTestClass {
 	public int doSomething(String param1, int param2) {
 		if (param2 < 10) {
-			int a =helper();
+			int a =1;
+			a=helper();
 			if(a>2){
 				return param2;
 			}
