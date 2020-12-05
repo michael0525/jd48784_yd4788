@@ -1,18 +1,18 @@
 package de.syngenio.demo1;
 
-import static org.junit.Assert.assertThat;
-
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 
-public class TestMyTestClass {
+import static org.junit.Assert.assertThat;
 
-	private MyTestClass _testObject;
+public class TestBasicTestClass1 {
+
+	private BasicTestClass1 _testObject;
 
 	@Before
 	public void setUp() {
-		_testObject = new MyTestClass();
+		_testObject = new BasicTestClass1();
 	}
 	
 	@Test

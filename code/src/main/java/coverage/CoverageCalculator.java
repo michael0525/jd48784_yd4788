@@ -122,6 +122,7 @@ public class CoverageCalculator {
         TestSuiteCoverageState targetCoverageState = null;
         for (int i = 0; i < n && iter.hasNext(); i++) {
             helper.cleanCoverageFile();
+            helper.cleanAll();
             String testName = iter.next();
             System.out.println("ready to run affected test: " + testName);
             double runningTime=helper.runTest(testName);
