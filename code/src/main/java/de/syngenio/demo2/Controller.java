@@ -9,12 +9,11 @@ public class Controller {
 	public Controller(Sensor sensor, Actor actor) {
 		_sensor = sensor;
 		_actor = actor;
-		
 	}
 	
 	public void singleDecision() {
 		if (_sensor.isMotorBlocked()) {
-//			int a =2;
+			int a = 2;
 			_actor.stopMotor();
 		} else {
 			int desiredTemperature;
